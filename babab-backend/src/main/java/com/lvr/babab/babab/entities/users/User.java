@@ -1,18 +1,24 @@
 package com.lvr.babab.babab.entities.users;
 
 import com.lvr.babab.babab.entities.address.Address;
+import com.lvr.babab.babab.entities.authentication.Role;
 import jakarta.persistence.*;
 import java.time.LocalDate;
-import lombok.NoArgsConstructor;
+import java.util.Collection;
+import java.util.List;
+import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.provisioning.UserDetailsManager;
 
 @Entity
-@NoArgsConstructor
 @Table(name = "users")
-public class User implements UserDetailsManager {
-  // TODO add createdOn date, and a birthdate!
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class User implements UserDetails {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Long id;
@@ -46,35 +52,7 @@ public class User implements UserDetailsManager {
   @OneToOne(cascade = CascadeType.ALL)
   Address address;
 
-  @Override
-  public void createUser(UserDetails user) {
-    // TODO
-  }
-
-  @Override
-  public void updateUser(UserDetails user) {
-    // TODO
-  }
-
-  @Override
-  public void deleteUser(String username) {
-    // TODO
-  }
-
-  @Override
-  public void changePassword(String oldPassword, String newPassword) {
-    // TODO
-  }
-
-  @Override
-  public boolean userExists(String username) {
-    // TODO
-    return false;
-  }
-
-  @Override
-  public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    // TODO
-    return null;
+  public Collection<? extends GrantedAuthority> getAuthorities() {
+    return List.of(new SimpleGrantedAuthority(role.toString()));
   }
 }
