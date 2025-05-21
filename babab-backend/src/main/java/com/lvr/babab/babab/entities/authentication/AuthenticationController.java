@@ -1,13 +1,11 @@
 package com.lvr.babab.babab.entities.authentication;
 
-import com.lvr.babab.babab.configurations.JwtService;
 import com.lvr.babab.babab.configurations.JwtToken;
 import com.lvr.babab.babab.configurations.Routes;
 import com.lvr.babab.babab.entities.authentication.dto.LoginRequest;
 import com.lvr.babab.babab.entities.authentication.dto.RegisterRequest;
 import com.lvr.babab.babab.entities.authentication.dto.RegisterResponse;
 import com.lvr.babab.babab.entities.users.UserService;
-import com.lvr.babab.babab.entities.users.dto.UserResponse;
 import jakarta.validation.Valid;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +18,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RequestMapping(Routes.AUTH)
 public class AuthenticationController {
   private final UserService userService;
-  private final JwtService jwtService;
 
-  // user registreren
   @PostMapping("/register")
   public ResponseEntity<RegisterResponse> register(
       @RequestBody @Valid RegisterRequest registerRequest) {
@@ -43,8 +39,8 @@ public class AuthenticationController {
     return ResponseEntity.ok(token);
   }
 
-  // @PatchMapping("/edit")
-  // public ResponseEntity<UserResponse> edit(@RequestBody PatchUser patch) {}
+  //@PatchMapping("/password")
+  //public ResponseEntity<UserResponse> edit(@RequestBody PatchUser patch) {}
 
   // user updaten
 

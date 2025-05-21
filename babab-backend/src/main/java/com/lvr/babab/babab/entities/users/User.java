@@ -24,13 +24,10 @@ public class User implements UserDetails {
   Long id;
 
   @Column(nullable = false, unique = true)
-  String username;
+  String email;
 
   @Column(nullable = false)
   String password;
-
-  @Column(nullable = false, unique = true)
-  String email;
 
   @Column(nullable = true)
   String firstName;
@@ -39,10 +36,10 @@ public class User implements UserDetails {
   String lastName;
 
   @Column(nullable = true)
-  LocalDate dateOfBirth;
+  LocalDate birthdate;
 
   @Column(nullable = false)
-  LocalDate createdDate;
+  LocalDate createdOn;
 
   @Column(nullable = false)
   @Enumerated(EnumType.STRING)
@@ -54,5 +51,10 @@ public class User implements UserDetails {
 
   public Collection<? extends GrantedAuthority> getAuthorities() {
     return List.of(new SimpleGrantedAuthority(role.toString()));
+  }
+
+  @Override
+  public String getUsername() {
+    return this.email;
   }
 }

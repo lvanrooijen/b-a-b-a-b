@@ -10,12 +10,11 @@ CREATE TABLE addresses
 CREATE TABLE users
 (
     id         BIGSERIAL PRIMARY KEY,
-    username   VARCHAR(50)  NOT NULL UNIQUE,
     password   VARCHAR(255) NOT NULL,
     email      VARCHAR(100) NOT NULL UNIQUE,
     first_name VARCHAR(100),
     last_name  VARCHAR(100),
     role       VARCHAR(50)  NOT NULL,
-    address_id BIGINT       NOT NULL UNIQUE,
+    address_id BIGINT UNIQUE,
     CONSTRAINT fk_address FOREIGN KEY (address_id) REFERENCES addresses (id)
 );

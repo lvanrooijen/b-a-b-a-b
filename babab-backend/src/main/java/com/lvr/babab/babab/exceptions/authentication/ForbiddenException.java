@@ -1,4 +1,4 @@
-package com.lvr.babab.babab.exceptions;
+package com.lvr.babab.babab.exceptions.authentication;
 
 public class ForbiddenException extends RuntimeException {
   public ForbiddenException(String message) {

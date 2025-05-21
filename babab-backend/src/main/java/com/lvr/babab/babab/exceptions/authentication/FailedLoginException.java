@@ -1,4 +1,4 @@
-package com.lvr.babab.babab.exceptions;
+package com.lvr.babab.babab.exceptions.authentication;
 
 public class FailedLoginException extends RuntimeException {
   public FailedLoginException(String message) {
