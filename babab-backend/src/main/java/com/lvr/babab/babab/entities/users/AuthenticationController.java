@@ -1,21 +1,23 @@
-package com.lvr.babab.babab.entities.authentication;
+package com.lvr.babab.babab.entities.users;
 
-import com.lvr.babab.babab.configurations.JwtToken;
 import com.lvr.babab.babab.configurations.Routes;
-import com.lvr.babab.babab.entities.authentication.dto.LoginRequest;
-import com.lvr.babab.babab.entities.authentication.dto.RegisterRequest;
-import com.lvr.babab.babab.entities.authentication.dto.RegisterResponse;
-import com.lvr.babab.babab.entities.users.UserService;
+import com.lvr.babab.babab.configurations.security.JwtToken;
+import com.lvr.babab.babab.entities.users.dto.LoginRequest;
+import com.lvr.babab.babab.entities.users.dto.RegisterRequest;
+import com.lvr.babab.babab.entities.users.dto.RegisterResponse;
 import jakarta.validation.Valid;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
+@RequestMapping(Routes.BASE_ROUTE)
 @RequiredArgsConstructor
-@RequestMapping(Routes.AUTH)
 public class AuthenticationController {
   private final UserService userService;
 
@@ -39,14 +41,6 @@ public class AuthenticationController {
     return ResponseEntity.ok(token);
   }
 
-  //@PatchMapping("/password")
-  //public ResponseEntity<UserResponse> edit(@RequestBody PatchUser patch) {}
-
-  // user updaten
-
-  // user inloggen
-
-  // user ww veranderen
-
-  // user eigen account verwijderen
+  // @PatchMapping("/password")
+  // public ResponseEntity<UserResponse> edit(@RequestBody PatchUser patch) {}
 }

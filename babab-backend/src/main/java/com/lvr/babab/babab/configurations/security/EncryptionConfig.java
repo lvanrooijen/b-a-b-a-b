@@ -1,4 +1,4 @@
-package com.lvr.babab.babab.configurations;
+package com.lvr.babab.babab.configurations.security;
 
 import io.jsonwebtoken.Jwts;
 import javax.crypto.SecretKey;

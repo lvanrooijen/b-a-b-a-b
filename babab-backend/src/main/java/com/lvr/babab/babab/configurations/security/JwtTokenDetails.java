@@ -1,4 +1,4 @@
-package com.lvr.babab.babab.configurations;
+package com.lvr.babab.babab.configurations.security;
 
 import java.util.Date;
 

@@ -1,4 +1,4 @@
-package com.lvr.babab.babab.configurations;
+package com.lvr.babab.babab.configurations.security;
 
 import com.lvr.babab.babab.entities.users.User;
 import com.lvr.babab.babab.entities.users.UserService;
@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,18 +17,19 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
+@Slf4j
 public class JwtAuthFilter extends OncePerRequestFilter {
   private static final String AUTHORIZATION_HEADER_NAME = "Authorization";
   private static final String AUTHORIZATION_HEADER_JWT_PREFIX = "Bearer ";
   private final UserService userService;
   private final JwtService jwtService;
 
-    public JwtAuthFilter(UserService userService, JwtService jwtService) {
-        this.userService = userService;
-        this.jwtService = jwtService;
-    }
+  public JwtAuthFilter(UserService userService, JwtService jwtService) {
+    this.userService = userService;
+    this.jwtService = jwtService;
+  }
 
-    private static boolean requestHasValidAuthHeader(HttpServletRequest request) {
+  private static boolean requestHasValidAuthHeader(HttpServletRequest request) {
     String authHeader = request.getHeader(AUTHORIZATION_HEADER_NAME);
     return authHeader != null && authHeader.startsWith(AUTHORIZATION_HEADER_JWT_PREFIX);
   }
@@ -55,7 +57,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
               });
     }
-
+    log.info("=== JwtAuthFilter: PATH = {}", request.getRequestURI());
+    log.info("=== Authorization header = {}", request.getHeader("Authorization"));
     filterChain.doFilter(request, response);
   }
 

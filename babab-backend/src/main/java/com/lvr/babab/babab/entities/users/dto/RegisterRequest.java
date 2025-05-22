@@ -1,4 +1,4 @@
-package com.lvr.babab.babab.entities.authentication.dto;
+package com.lvr.babab.babab.entities.users.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

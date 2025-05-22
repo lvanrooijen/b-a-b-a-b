@@ -6,8 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class BababApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(BababApplication.class, args);
-	}
-
+  public static void main(String[] args) {
+    SpringApplication.run(BababApplication.class, args);
+  }
 }

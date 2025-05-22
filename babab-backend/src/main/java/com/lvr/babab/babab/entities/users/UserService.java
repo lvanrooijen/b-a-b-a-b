@@ -1,20 +1,18 @@
 package com.lvr.babab.babab.entities.users;
 
-import com.lvr.babab.babab.configurations.JwtService;
-import com.lvr.babab.babab.configurations.JwtToken;
-import com.lvr.babab.babab.entities.authentication.Role;
-import com.lvr.babab.babab.entities.authentication.dto.LoginRequest;
-import com.lvr.babab.babab.entities.authentication.dto.RegisterRequest;
-import com.lvr.babab.babab.entities.authentication.dto.RegisterResponse;
-import com.lvr.babab.babab.entities.users.dto.UserResponse;
+import com.lvr.babab.babab.configurations.security.JwtService;
+import com.lvr.babab.babab.configurations.security.JwtToken;
+import com.lvr.babab.babab.entities.users.dto.*;
 import com.lvr.babab.babab.exceptions.authentication.DuplicateEmailException;
 import com.lvr.babab.babab.exceptions.authentication.FailedLoginException;
 import com.lvr.babab.babab.exceptions.authentication.PasswordMismatchException;
 import com.lvr.babab.babab.exceptions.authentication.UserNotFoundException;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,6 +28,46 @@ public class UserService implements UserDetailsManager {
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
   private final JwtService jwtService;
+
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  public List<UserResponseMax> getAll() {
+    return userRepository.findAll().stream().map(UserResponseMax::to).toList();
+  }
+
+  @PreAuthorize("hasRole('ROLE_ADMIN')")
+  public UserResponseMax patchUser(Long id, PatchUser patch) {
+    log.info("Patching user from service class with id {}", id);
+    User user =
+        userRepository
+            .findById(id)
+            .orElseThrow(
+                () ->
+                    new UsernameNotFoundException(
+                        String.format("[update user failed] reason=user id not found id=%s", id)));
+
+    if (patch.firstname() != null) {
+      user.setFirstName(patch.firstname());
+    }
+
+    if (patch.lastname() != null) {
+      user.setLastName(patch.lastname());
+    }
+
+    if (patch.birthday() != null) {
+      user.setBirthdate(patch.birthday());
+    }
+
+    if (patch.email() != null) {
+      if (userRepository.findByEmailIgnoreCase(patch.email()).isPresent()) {
+        throw new DuplicateEmailException(
+            String.format(
+                "[update user failed] reason=email already exists email=%s", patch.email()));
+      }
+    }
+
+    userRepository.save(user);
+    return UserResponseMax.to(user);
+  }
 
   public RegisterResponse register(@Valid RegisterRequest registerRequest) {
     userRepository
@@ -53,10 +91,10 @@ public class UserService implements UserDetailsManager {
 
     createUser(user);
 
-    UserResponse userResponse = new UserResponse(user.id, user.getEmail());
+    UserResponseMin userResponseMin = new UserResponseMin(user.id, user.getEmail());
     String token = jwtService.generateTokenForUser(user);
 
-    return new RegisterResponse(token, userResponse);
+    return new RegisterResponse(token, userResponseMin);
   }
 
   public JwtToken login(LoginRequest loginRequest) {

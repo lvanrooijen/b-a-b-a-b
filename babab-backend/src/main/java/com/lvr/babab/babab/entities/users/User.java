@@ -1,7 +1,6 @@
 package com.lvr.babab.babab.entities.users;
 
 import com.lvr.babab.babab.entities.address.Address;
-import com.lvr.babab.babab.entities.authentication.Role;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.Collection;

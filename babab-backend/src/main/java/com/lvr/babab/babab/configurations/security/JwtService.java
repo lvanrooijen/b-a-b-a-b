@@ -1,4 +1,4 @@
-package com.lvr.babab.babab.configurations;
+package com.lvr.babab.babab.configurations.security;
 
 import com.lvr.babab.babab.entities.users.User;
 import io.jsonwebtoken.Claims;
