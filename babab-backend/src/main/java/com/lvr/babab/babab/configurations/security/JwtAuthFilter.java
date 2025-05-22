@@ -1,7 +1,7 @@
 package com.lvr.babab.babab.configurations.security;
 
+import com.lvr.babab.babab.entities.authentication.AuthenticationService;
 import com.lvr.babab.babab.entities.users.User;
-import com.lvr.babab.babab.entities.users.UserService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,11 +21,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtAuthFilter extends OncePerRequestFilter {
   private static final String AUTHORIZATION_HEADER_NAME = "Authorization";
   private static final String AUTHORIZATION_HEADER_JWT_PREFIX = "Bearer ";
-  private final UserService userService;
+  private final AuthenticationService authenticationService;
   private final JwtService jwtService;
 
-  public JwtAuthFilter(UserService userService, JwtService jwtService) {
-    this.userService = userService;
+  public JwtAuthFilter(AuthenticationService authenticationService, JwtService jwtService) {
+    this.authenticationService = authenticationService;
     this.jwtService = jwtService;
   }
 
@@ -67,6 +67,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         .readToken(authorization.substring(AUTHORIZATION_HEADER_JWT_PREFIX.length()))
         .filter(token -> !token.isExpired())
         .flatMap(
-            token -> Optional.ofNullable((User) userService.loadUserByUsername(token.email())));
+            token -> Optional.ofNullable((User) authenticationService.loadUserByUsername(token.email())));
   }
 }

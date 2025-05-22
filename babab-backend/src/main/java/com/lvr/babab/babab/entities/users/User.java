@@ -44,8 +44,8 @@ public class User implements UserDetails {
   @Enumerated(EnumType.STRING)
   Role role;
 
-  @JoinColumn(nullable = false, name = "address_id", unique = true)
-  @OneToOne(cascade = CascadeType.ALL)
+  @JoinColumn(name = "address_id", unique = true)
+  @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, optional = true)
   Address address;
 
   public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -55,5 +55,9 @@ public class User implements UserDetails {
   @Override
   public String getUsername() {
     return this.email;
+  }
+
+  public Boolean isAdmin() {
+    return role.equals(Role.ADMIN);
   }
 }

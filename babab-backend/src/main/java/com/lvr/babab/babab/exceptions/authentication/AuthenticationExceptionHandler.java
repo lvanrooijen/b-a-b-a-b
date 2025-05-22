@@ -17,20 +17,6 @@ public class AuthenticationExceptionHandler {
     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(detail);
   }
 
-  @ExceptionHandler(DuplicateEmailException.class)
-  public ResponseEntity<ProblemDetail> handleDuplicateEmailException(DuplicateEmailException e) {
-    log.warn("[exception] type=[DuplicateEmailException, message={}]", e.getMessage());
-    ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
-    return ResponseEntity.status(detail.getStatus()).body(detail);
-  }
-
-  @ExceptionHandler(UserNotFoundException.class)
-  public ResponseEntity<ProblemDetail> handleUserNotFoundException(UserNotFoundException e) {
-    log.warn("[exception] type=[UserNotFoundException, message={}]", e.getMessage());
-    ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
-    return ResponseEntity.status(detail.getStatus()).body(detail);
-  }
-
   @ExceptionHandler(FailedLoginException.class)
   public ResponseEntity<ProblemDetail> handleFailedLoginException(FailedLoginException e) {
     log.warn("[exception] type=FailedLoginException, message={}", e.getMessage());
@@ -44,7 +30,16 @@ public class AuthenticationExceptionHandler {
   public ResponseEntity<ProblemDetail> handlePasswordMismatchException(
       PasswordMismatchException e) {
     log.warn("[exception] type=[PasswordMismatchException, message={}]", e.getMessage());
-    ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+    ProblemDetail detail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Password is incorrect");
+    return ResponseEntity.status(detail.getStatus()).body(detail);
+  }
+
+  @ExceptionHandler(AdminOnlyActionException.class)
+  public ResponseEntity<ProblemDetail> handleAdminOnlyException(AdminOnlyActionException e) {
+    log.warn("[exception] type=[AdminOnlyException, message={}]", e.getMessage());
+    ProblemDetail detail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Admin only action");
     return ResponseEntity.status(detail.getStatus()).body(detail);
   }
 }

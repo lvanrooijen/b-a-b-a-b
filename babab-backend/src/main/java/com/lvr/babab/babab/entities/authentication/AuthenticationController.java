@@ -1,30 +1,27 @@
-package com.lvr.babab.babab.entities.users;
+package com.lvr.babab.babab.entities.authentication;
 
 import com.lvr.babab.babab.configurations.Routes;
 import com.lvr.babab.babab.configurations.security.JwtToken;
-import com.lvr.babab.babab.entities.users.dto.LoginRequest;
-import com.lvr.babab.babab.entities.users.dto.RegisterRequest;
-import com.lvr.babab.babab.entities.users.dto.RegisterResponse;
+import com.lvr.babab.babab.entities.authentication.dto.LoginRequest;
+import com.lvr.babab.babab.entities.authentication.dto.RegisterRequest;
+import com.lvr.babab.babab.entities.authentication.dto.RegisterResponse;
 import jakarta.validation.Valid;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping(Routes.BASE_ROUTE)
 @RequiredArgsConstructor
 public class AuthenticationController {
-  private final UserService userService;
+  private final AuthenticationService authenticationService;
 
   @PostMapping("/register")
   public ResponseEntity<RegisterResponse> register(
       @RequestBody @Valid RegisterRequest registerRequest) {
-    RegisterResponse registerResponse = userService.register(registerRequest);
+    RegisterResponse registerResponse = authenticationService.register(registerRequest);
     URI location =
         ServletUriComponentsBuilder.fromCurrentRequest()
             .path("{/id}")
@@ -36,11 +33,14 @@ public class AuthenticationController {
   @PostMapping("/login")
   public ResponseEntity<JwtToken> login(@RequestBody LoginRequest loginRequest) {
 
-    JwtToken token = userService.login(loginRequest);
+    JwtToken token = authenticationService.login(loginRequest);
 
     return ResponseEntity.ok(token);
   }
 
-  // @PatchMapping("/password")
-  // public ResponseEntity<UserResponse> edit(@RequestBody PatchUser patch) {}
+  @PostMapping("/password/{id}")
+  public ResponseEntity<Void> edit(@PathVariable Long id) {
+    authenticationService.requestPasswordReset(id);
+    return ResponseEntity.ok().build();
+  }
 }
