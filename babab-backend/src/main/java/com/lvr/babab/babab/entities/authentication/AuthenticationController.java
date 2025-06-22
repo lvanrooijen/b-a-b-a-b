@@ -38,8 +38,8 @@ public class AuthenticationController {
     return ResponseEntity.ok(token);
   }
 
-  @PostMapping("/password/{id}")
-  public ResponseEntity<Void> edit(@PathVariable Long id) {
+  @PostMapping("/password-reset/{id}")
+  public ResponseEntity<Void> requestPasswordReset(@PathVariable Long id) {
     authenticationService.requestPasswordReset(id);
     return ResponseEntity.ok().build();
   }

@@ -1,9 +1,11 @@
 package com.lvr.babab.babab;
 
+import com.lvr.babab.babab.entities.users.AdminUser;
 import com.lvr.babab.babab.entities.users.Role;
 import com.lvr.babab.babab.entities.users.User;
 import com.lvr.babab.babab.entities.users.UserRepository;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
@@ -26,11 +28,13 @@ public class Seeder implements CommandLineRunner {
     if (userRepository.findByEmailIgnoreCase("admin@admin.com").isPresent()) return;
 
     User admin =
-        User.builder()
+        AdminUser.builder()
             .email("admin@admin.com")
             .password(passwordEncoder.encode("securePassword1234!"))
             .createdOn(LocalDate.now())
             .role(Role.ADMIN)
+            .failedLoginAttempts(0)
+            .lastLogin(LocalDateTime.now())
             .build();
     userRepository.save(admin);
   }

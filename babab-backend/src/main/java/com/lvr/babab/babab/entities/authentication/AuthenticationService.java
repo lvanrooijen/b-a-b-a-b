@@ -6,18 +6,20 @@ import com.lvr.babab.babab.entities.authentication.dto.LoginRequest;
 import com.lvr.babab.babab.entities.authentication.dto.RegisterRequest;
 import com.lvr.babab.babab.entities.authentication.dto.RegisterResponse;
 import com.lvr.babab.babab.entities.authentication.dto.loginResponse;
-import com.lvr.babab.babab.entities.users.Role;
-import com.lvr.babab.babab.entities.users.User;
-import com.lvr.babab.babab.entities.users.UserRepository;
+import com.lvr.babab.babab.entities.email.MailService;
+import com.lvr.babab.babab.entities.passwordreset.PasswordResetRequest;
+import com.lvr.babab.babab.entities.passwordreset.PasswordResetRequestService;
+import com.lvr.babab.babab.entities.users.*;
 import com.lvr.babab.babab.exceptions.authentication.FailedLoginException;
+import com.lvr.babab.babab.exceptions.authentication.FailedSendPasswordResetEmailException;
 import com.lvr.babab.babab.exceptions.authentication.PasswordMismatchException;
 import com.lvr.babab.babab.exceptions.users.DuplicateEmailException;
 import com.lvr.babab.babab.exceptions.users.UserNotFoundException;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
-import org.springframework.mail.MailSender;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -29,10 +31,11 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService implements UserDetailsManager {
+  private final PasswordResetRequestService passwordResetRequestService;
   private final PasswordEncoder passwordEncoder;
   private final UserRepository userRepository;
   private final JwtService jwtService;
-  private final MailSender mailSender;
+  private final MailService mailService;
 
   public RegisterResponse register(@Valid RegisterRequest registerRequest) {
     if (userExists(registerRequest.email())) {
@@ -43,7 +46,7 @@ public class AuthenticationService implements UserDetailsManager {
     }
 
     User user =
-        User.builder()
+        CustomerUser.builder()
             .email(registerRequest.email())
             .password(passwordEncoder.encode(registerRequest.password()))
             .firstName(registerRequest.firstname())
@@ -139,13 +142,35 @@ public class AuthenticationService implements UserDetailsManager {
   }
 
   public void requestPasswordReset(Long id) {
-    // TODO send email to use
-    User user = userRepository.findById(id).orElseThrow(() -> new UsernameNotFoundException(""));
-    SimpleMailMessage mailMessage = new SimpleMailMessage();
-    mailMessage.setTo(user.getEmail());
-    mailMessage.setSubject("Password reset");
-    // todo generate reset token + link
-    mailMessage.setText("Link with token: " + jwtService.generateTokenForUser(user));
-    mailSender.send(mailMessage);
+    User user =
+        userRepository
+            .findById(id)
+            .orElseThrow(
+                () ->
+                    new UsernameNotFoundException(
+                        String.format(
+                            "[failed to sed password reset email] reason=user not found id=%s",
+                            id)));
+
+    PasswordResetRequest resetRequest = passwordResetRequestService.requestPasswordReset(user);
+
+    String resetUrl = generateResetUrl(resetRequest.getVerificationCode());
+
+    try {
+      String name =
+          user instanceof CustomerUser
+              ? ((CustomerUser) user).getFirstName()
+              : ((BusinessUser) user).getCompanyName();
+      mailService.sendPasswordResetEmail(user.getEmail(), name, resetUrl);
+    } catch (MessagingException e) {
+      throw new FailedSendPasswordResetEmailException(
+          String.format(
+              "[failed to send password reset email] reason=[MessagingException] email=%s",
+              user.getEmail()));
+    }
+  }
+
+  private String generateResetUrl(UUID resetCode) {
+    return String.format("http://www.babab.com/%s", resetCode);
   }
 }

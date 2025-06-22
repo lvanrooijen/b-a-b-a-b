@@ -10,9 +10,28 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 @Slf4j
 public class AuthenticationExceptionHandler {
+  @ExceptionHandler(FailedSendPasswordResetEmailException.class)
+  public ResponseEntity<ProblemDetail> handleFailedSendPasswordResetEmailException(
+      FailedSendPasswordResetEmailException e) {
+    log.warn("[exception] type=FailedSendPasswordResetEmailException, message={}", e.getMessage());
+    ProblemDetail problemDetail =
+        ProblemDetail.forStatusAndDetail(
+            HttpStatus.BAD_REQUEST, "Something went wrong try again later");
+    return new ResponseEntity<>(problemDetail, HttpStatus.BAD_REQUEST);
+  }
+
+  @ExceptionHandler(PendingPasswordResetRequestException.class)
+  public ResponseEntity<ProblemDetail> handlePendingPasswordResetRequestException(
+      PendingPasswordResetRequestException e) {
+    log.warn("[exception] type=PendingPasswordResetRequestException, message={}", e.getMessage());
+    ProblemDetail detail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Wait " + e.duration + " minutes");
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(detail);
+  }
+
   @ExceptionHandler(ForbiddenException.class)
   public ResponseEntity<ProblemDetail> handleForbiddenException(ForbiddenException e) {
-    log.warn("[exception] type=[ForbiddenException, message={}]", e.getMessage());
+    log.warn("[exception] type=ForbiddenException, message={}", e.getMessage());
     ProblemDetail detail = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, e.getMessage());
     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(detail);
   }

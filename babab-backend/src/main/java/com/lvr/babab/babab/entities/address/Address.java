@@ -11,15 +11,15 @@ public class Address {
   @GeneratedValue(strategy = GenerationType.AUTO)
   Long id;
 
-  @Column(nullable = false)
+  @Column(name = "street", nullable = false)
   String street;
 
-  @Column(nullable = false)
+  @Column(name = "house_number", nullable = false)
   Integer house_number;
 
-  @Column(nullable = false)
+  @Column(name = "city", nullable = false)
   String city;
 
-  @Column(nullable = false)
+  @Column(name = "postal_code", nullable = false)
   String postalCode;
 }

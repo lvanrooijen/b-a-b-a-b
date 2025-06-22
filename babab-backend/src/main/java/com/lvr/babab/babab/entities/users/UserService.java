@@ -4,6 +4,7 @@ import com.lvr.babab.babab.entities.authentication.AuthenticationService;
 import com.lvr.babab.babab.entities.users.dto.*;
 import com.lvr.babab.babab.exceptions.authentication.AdminOnlyActionException;
 import com.lvr.babab.babab.exceptions.users.DuplicateEmailException;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,19 +20,25 @@ public class UserService {
   private final AuthenticationService authenticationService;
 
   @PreAuthorize("hasRole('ROLE_ADMIN')")
-  public List<UserResponseMax> getAll() {
-    return userRepository.findAll().stream().map(UserResponseMax::to).toList();
+  public List<CustomerUserPatchResponse> getAll() {
+    return userRepository.findAll().stream()
+        .filter(user -> user instanceof CustomerUser)
+        .map(user -> (CustomerUser) user)
+        .map(CustomerUserPatchResponse::to)
+        .toList();
   }
 
   @PreAuthorize("hasRole('ROLE_ADMIN') or #id.equals(authentication.principal.id)")
-  public UserResponseMax patchUser(Long id, PatchUser patch) {
-    User user =
-        userRepository
-            .findById(id)
-            .orElseThrow(
-                () ->
-                    new UsernameNotFoundException(
-                        String.format("[update user failed] reason=user id not found id=%s", id)));
+  public CustomerUserPatchResponse patchUser(Long id, CustomerUserPatch patch) {
+    CustomerUser user =
+        (CustomerUser)
+            userRepository
+                .findById(id)
+                .orElseThrow(
+                    () ->
+                        new UsernameNotFoundException(
+                            String.format(
+                                "[update user failed] reason=user id not found id=%s", id)));
     if (user.isAdmin()) {
       throw new AdminOnlyActionException(
           "[update user failed] reason=admin account may not be altered");
@@ -57,21 +64,27 @@ public class UserService {
       }
     }
     authenticationService.updateUser(user);
-    return UserResponseMax.to(user);
+    return CustomerUserPatchResponse.to(user);
+  }
+
+  public CustomerUserPatchResponse patchBusinessUser(BusinessUserPatch patch) {
+    // TODO patch business user
+    return new CustomerUserPatchResponse(-999L, "", "", "", LocalDate.of(1970, 1, 1));
   }
 
   @PreAuthorize("hasRole('USER_ADMIN' or #id.equals(authentication.principal.id))")
-  public UserResponseMax getById(Long id) {
-    User user =
-        userRepository
-            .findById(id)
-            .orElseThrow(
-                () ->
-                    new UsernameNotFoundException(
-                        String.format(
-                            "[failed to get user by id] reason=user with this id not found id=%s",
-                            id)));
-    return UserResponseMax.to(user);
+  public CustomerUserPatchResponse getById(Long id) {
+    CustomerUser user =
+        (CustomerUser)
+            userRepository
+                .findById(id)
+                .orElseThrow(
+                    () ->
+                        new UsernameNotFoundException(
+                            String.format(
+                                "[failed to get user by id] reason=user with this id not found id=%s",
+                                id)));
+    return CustomerUserPatchResponse.to(user);
   }
 
   @PreAuthorize("hasRole('ROLE_ADMIN' or #id.equals(authentication.principal.id))")

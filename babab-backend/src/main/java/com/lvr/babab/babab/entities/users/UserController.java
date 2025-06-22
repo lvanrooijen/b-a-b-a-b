@@ -18,18 +18,18 @@ public class UserController {
   private final AuthenticationService authenticationService;
 
   @GetMapping
-  public ResponseEntity<List<UserResponseMax>> getAllUsers() {
+  public ResponseEntity<List<CustomerUserPatchResponse>> getAllUsers() {
     return ResponseEntity.ok(userService.getAll());
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<UserResponseMax> getUserById(@PathVariable Long id) {
+  public ResponseEntity<CustomerUserPatchResponse> getUserById(@PathVariable Long id) {
     return ResponseEntity.ok(userService.getById(id));
   }
 
   @PatchMapping("/{id}")
-  public ResponseEntity<UserResponseMax> updateUser(
-      @PathVariable Long id, @RequestBody PatchUser patch) {
+  public ResponseEntity<CustomerUserPatchResponse> updateUser(
+      @PathVariable Long id, @RequestBody CustomerUserPatch patch) {
     return ResponseEntity.ok(userService.patchUser(id, patch));
   }
 

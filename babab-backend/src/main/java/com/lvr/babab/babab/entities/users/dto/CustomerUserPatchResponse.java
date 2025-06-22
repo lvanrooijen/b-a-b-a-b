@@ -1,12 +1,12 @@
 package com.lvr.babab.babab.entities.users.dto;
 
-import com.lvr.babab.babab.entities.users.User;
+import com.lvr.babab.babab.entities.users.CustomerUser;
 import java.time.LocalDate;
 
-public record UserResponseMax(
+public record CustomerUserPatchResponse(
     Long id, String email, String firstName, String lastName, LocalDate birthday) {
-  public static UserResponseMax to(User user) {
-    return new UserResponseMax(
+  public static CustomerUserPatchResponse to(CustomerUser user) {
+    return new CustomerUserPatchResponse(
         user.getId(),
         user.getEmail(),
         user.getFirstName(),

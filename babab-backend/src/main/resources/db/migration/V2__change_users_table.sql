@@ -1,6 +1,0 @@
-ALTER TABLE users
-    ADD COLUMN birthdate DATE;
-
-ALTER TABLE users
-    ADD COLUMN created_on DATE NOT NULL DEFAULT
-        CURRENT_DATE;

@@ -14,33 +14,24 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Table(name = "users")
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class User implements UserDetails {
+@Inheritance(strategy = InheritanceType.JOINED)
+public abstract class User implements UserDetails {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Long id;
 
-  @Column(nullable = false, unique = true)
+  @Column(name = "email", nullable = false, unique = true)
   String email;
 
-  @Column(nullable = false)
+  @Column(name = "password", nullable = false)
   String password;
 
-  @Column(nullable = true)
-  String firstName;
-
-  @Column(nullable = true)
-  String lastName;
-
-  @Column(nullable = true)
-  LocalDate birthdate;
-
-  @Column(nullable = false)
+  @Column(name = "created_on", nullable = false)
   LocalDate createdOn;
 
-  @Column(nullable = false)
+  @Column(name = "role", nullable = false)
   @Enumerated(EnumType.STRING)
   Role role;
 
