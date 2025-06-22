@@ -1,0 +1,5 @@
+* Dubbel checken of alles nog werkt
+* De authenticationservice heeft een method om die businessaccounts aan te maken. endpoint checken en bugs fixen
+* SQL safe input validator maken. also custom validation fucking cool!
+* login response geeft nu een token en dan user object mee, niet mooi aanpassen!
+* dubbel checken wat ik met die mail sender aan t doen was, of t werk en dan ok die configuratie map netjes organisren

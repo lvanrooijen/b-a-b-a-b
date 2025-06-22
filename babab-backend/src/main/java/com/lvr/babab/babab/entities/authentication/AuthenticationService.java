@@ -2,10 +2,7 @@ package com.lvr.babab.babab.entities.authentication;
 
 import com.lvr.babab.babab.configurations.security.JwtService;
 import com.lvr.babab.babab.configurations.security.JwtToken;
-import com.lvr.babab.babab.entities.authentication.dto.LoginRequest;
-import com.lvr.babab.babab.entities.authentication.dto.RegisterRequest;
-import com.lvr.babab.babab.entities.authentication.dto.RegisterResponse;
-import com.lvr.babab.babab.entities.authentication.dto.loginResponse;
+import com.lvr.babab.babab.entities.authentication.dto.*;
 import com.lvr.babab.babab.entities.email.MailService;
 import com.lvr.babab.babab.entities.passwordreset.PasswordResetRequest;
 import com.lvr.babab.babab.entities.passwordreset.PasswordResetRequestService;
@@ -37,49 +34,49 @@ public class AuthenticationService implements UserDetailsManager {
   private final JwtService jwtService;
   private final MailService mailService;
 
-  public RegisterResponse register(@Valid RegisterRequest registerRequest) {
-    if (userExists(registerRequest.email())) {
+  public RegisterUserResponse register(@Valid RegisterUserRequestBody requestBody) {
+    if (userExists(requestBody.email())) {
       throw new DuplicateEmailException(
           String.format(
-              "[register failed] reason=email already registered, email=%s",
-              registerRequest.email()));
+              "[register failed] reason=email already registered, email=%s", requestBody.email()));
     }
 
     User user =
         CustomerUser.builder()
-            .email(registerRequest.email())
-            .password(passwordEncoder.encode(registerRequest.password()))
-            .firstName(registerRequest.firstname())
-            .lastName(registerRequest.lastname())
+            .email(requestBody.email())
+            .password(passwordEncoder.encode(requestBody.password()))
+            .firstName(requestBody.firstname())
+            .lastName(requestBody.lastname())
+            .birthdate(requestBody.birthdate())
             .role(Role.USER)
             .createdOn(LocalDate.now())
             .build();
 
     createUser(user);
 
-    loginResponse loginResponse = new loginResponse(user.getId(), user.getEmail());
+    LoginResponse loginResponse = new LoginResponse(user.getId(), user.getEmail());
     String token = jwtService.generateTokenForUser(user);
 
-    return new RegisterResponse(token, loginResponse);
+    return new RegisterUserResponse(token, loginResponse);
   }
 
-  public JwtToken login(LoginRequest loginRequest) {
+  public JwtToken login(LoginRequest requestBody) {
     User user =
         userRepository
-            .findByEmailIgnoreCase(loginRequest.email())
+            .findByEmailIgnoreCase(requestBody.email())
             .orElseThrow(
                 () ->
                     new UserNotFoundException(
                         String.format(
                             "[login failed] reason=user does not exist, email=%s",
-                            loginRequest.email())));
+                            requestBody.email())));
 
-    if (passwordEncoder.matches(loginRequest.password(), user.getPassword())) {
+    if (passwordEncoder.matches(requestBody.password(), user.getPassword())) {
       return new JwtToken(jwtService.generateTokenForUser(user));
     } else {
       throw new FailedLoginException(
           String.format(
-              "[login failed] reason=invalid password : [email] %s", loginRequest.email()));
+              "[login failed] reason=invalid password : [email] %s", requestBody.email()));
     }
   }
 
@@ -149,7 +146,7 @@ public class AuthenticationService implements UserDetailsManager {
                 () ->
                     new UsernameNotFoundException(
                         String.format(
-                            "[failed to sed password reset email] reason=user not found id=%s",
+                            "[failed to send password reset email] reason=user not found id=%s",
                             id)));
 
     PasswordResetRequest resetRequest = passwordResetRequestService.requestPasswordReset(user);
@@ -172,5 +169,31 @@ public class AuthenticationService implements UserDetailsManager {
 
   private String generateResetUrl(UUID resetCode) {
     return String.format("http://www.babab.com/%s", resetCode);
+  }
+
+  public RegisterUserResponse registerBusinessAccount(
+      RegisterBusinessAccountRequestBody requestBody) {
+    if (userExists(requestBody.email())) {
+      throw new DuplicateEmailException(
+          String.format(
+              "[register failed] reason=email already registered, email=%s", requestBody.email()));
+    }
+
+    User user =
+        BusinessUser.builder()
+            .email(requestBody.email())
+            .password(passwordEncoder.encode(requestBody.password()))
+            .companyName(requestBody.companyName())
+            .kvkNumber(requestBody.kvkNumber())
+            .role(Role.USER)
+            .createdOn(LocalDate.now())
+            .build();
+
+    createUser(user);
+
+    LoginResponse loginResponse = new LoginResponse(user.getId(), user.getEmail());
+    String token = jwtService.generateTokenForUser(user);
+
+    return new RegisterUserResponse(token, loginResponse);
   }
 }

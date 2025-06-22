@@ -2,9 +2,7 @@ package com.lvr.babab.babab.entities.authentication;
 
 import com.lvr.babab.babab.configurations.Routes;
 import com.lvr.babab.babab.configurations.security.JwtToken;
-import com.lvr.babab.babab.entities.authentication.dto.LoginRequest;
-import com.lvr.babab.babab.entities.authentication.dto.RegisterRequest;
-import com.lvr.babab.babab.entities.authentication.dto.RegisterResponse;
+import com.lvr.babab.babab.entities.authentication.dto.*;
 import jakarta.validation.Valid;
 import java.net.URI;
 import lombok.RequiredArgsConstructor;
@@ -19,15 +17,28 @@ public class AuthenticationController {
   private final AuthenticationService authenticationService;
 
   @PostMapping("/register")
-  public ResponseEntity<RegisterResponse> register(
-      @RequestBody @Valid RegisterRequest registerRequest) {
-    RegisterResponse registerResponse = authenticationService.register(registerRequest);
+  public ResponseEntity<RegisterUserResponse> register(
+      @RequestBody @Valid RegisterUserRequestBody registerUserRequestBody) {
+    RegisterUserResponse registerUserResponse =
+        authenticationService.register(registerUserRequestBody);
     URI location =
         ServletUriComponentsBuilder.fromCurrentRequest()
             .path("{/id}")
-            .buildAndExpand(registerResponse.user().id())
+            .buildAndExpand(registerUserResponse.user().id())
             .toUri();
-    return ResponseEntity.created(location).body(registerResponse);
+    return ResponseEntity.created(location).body(registerUserResponse);
+  }
+
+  @PostMapping("/register-business-account")
+  public ResponseEntity<RegisterUserResponse> registerBusinessAccount(
+      @RequestBody @Valid RegisterBusinessAccountRequestBody request) {
+    RegisterUserResponse response = authenticationService.registerBusinessAccount(request);
+    URI location =
+        ServletUriComponentsBuilder.fromCurrentRequest()
+            .path("{/id}")
+            .buildAndExpand(response.user().id())
+            .toUri();
+    return ResponseEntity.created(location).body(response);
   }
 
   @PostMapping("/login")
