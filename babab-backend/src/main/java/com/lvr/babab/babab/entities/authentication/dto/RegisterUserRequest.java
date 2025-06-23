@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import org.hibernate.validator.constraints.Length;
 
-public record RegisterUserRequestBody(
+public record RegisterUserRequest(
     @Email @NotBlank String email,
     @NotBlank @Password String password,
     @NotBlank(message = "First name is required")

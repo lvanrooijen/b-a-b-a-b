@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import org.hibernate.validator.constraints.Length;
 
-public record RegisterBusinessAccountRequestBody(
+public record RegisterBusinessAccountRequest(
     @NotBlank(message = "Company Name is required")
         @Length(min = 1, max = 250, message = "Company name must be between 1 and 250 characters")
         String companyName,

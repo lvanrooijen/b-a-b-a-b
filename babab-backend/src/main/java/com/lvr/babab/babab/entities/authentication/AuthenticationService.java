@@ -34,7 +34,7 @@ public class AuthenticationService implements UserDetailsManager {
   private final JwtService jwtService;
   private final MailService mailService;
 
-  public RegisterUserResponse register(@Valid RegisterUserRequestBody requestBody) {
+  public RegisterUserResponse register(@Valid RegisterUserRequest requestBody) {
     if (userExists(requestBody.email())) {
       throw new DuplicateEmailException(
           String.format(
@@ -171,8 +171,7 @@ public class AuthenticationService implements UserDetailsManager {
     return String.format("http://www.babab.com/%s", resetCode);
   }
 
-  public RegisterUserResponse registerBusinessAccount(
-      RegisterBusinessAccountRequestBody requestBody) {
+  public RegisterUserResponse registerBusinessAccount(RegisterBusinessAccountRequest requestBody) {
     if (userExists(requestBody.email())) {
       throw new DuplicateEmailException(
           String.format(

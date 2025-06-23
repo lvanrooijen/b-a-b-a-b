@@ -4,60 +4,71 @@ import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 public class PasswordValidator implements ConstraintValidator<Password, String> {
-
   @Override
   public boolean isValid(String value, ConstraintValidatorContext context) {
     if (value == null || value.isEmpty()) {
       return true;
     }
 
-    context.disableDefaultConstraintViolation();
-    if (value.length() < 8 || value.length() > 30) {
-      context
-          .buildConstraintViolationWithTemplate("Password must be between 8 and 30 characters")
-          .addConstraintViolation();
+    if (!hasValidLength(value)) {
+      setErrorMessage(context, "Password length should be between 8 and 30 characters");
       return false;
     }
 
-    if (!value.matches(".*[0-9].*")) {
-      context
-          .buildConstraintViolationWithTemplate("Password must contain at least 1 digit")
-          .addConstraintViolation();
+    if (!containsADigit(value)) {
+      setErrorMessage(context, "Password must contain at least 1 digit");
       return false;
     }
 
-    if (!value.matches(".*[a-z].*")) {
-      context
-          .buildConstraintViolationWithTemplate("Password must contain at least 1 lowercase letter")
-          .addConstraintViolation();
+    if (!containsLowerCase(value)) {
+      setErrorMessage(context, "Password must contain at least 1 lowercase letter");
       return false;
     }
 
-    if (!value.matches(".*[A-Z].*")) {
-      context
-          .buildConstraintViolationWithTemplate("Password must contain at least 1 uppercase letter")
-          .addConstraintViolation();
+    if (!containsUpperCase(value)) {
+      setErrorMessage(context, "Password must contain at least 1 uppercase letter");
       return false;
     }
 
-    if (!value.matches(".*[\\W].*")) {
-      context
-          .buildConstraintViolationWithTemplate(
-              "Password must contain at least 1 special character")
-          .addConstraintViolation();
+    if (!containsSpecialCharacter(value)) {
+      setErrorMessage(context, "Password must contain at least 1 special character");
       return false;
     }
 
-    if (value.contains(" ")) {
-      context
-          .buildConstraintViolationWithTemplate("Blank space is not allowed in password")
-          .addConstraintViolation();
+    if (containsBlankSpace(value)) {
+      setErrorMessage(context, "Password must contain at least 1 blank space");
       return false;
     }
 
-    context
-        .buildConstraintViolationWithTemplate("Password does not meet requirements")
-        .addConstraintViolation();
     return true;
+  }
+
+  private void setErrorMessage(ConstraintValidatorContext context, String errorMessage) {
+    context.disableDefaultConstraintViolation();
+    context.buildConstraintViolationWithTemplate(errorMessage).addConstraintViolation();
+  }
+
+  private boolean hasValidLength(String password) {
+    return password.length() >= 8 && password.length() <= 30;
+  }
+
+  private boolean containsADigit(String password) {
+    return password.matches(".*[0-9].*");
+  }
+
+  private boolean containsLowerCase(String password) {
+    return password.matches(".*[a-z].*");
+  }
+
+  private boolean containsUpperCase(String password) {
+    return password.matches(".*[A-Z].*");
+  }
+
+  private boolean containsSpecialCharacter(String password) {
+    return password.matches(".*[\\W].*");
+  }
+
+  private boolean containsBlankSpace(String password) {
+    return password.contains(" ");
   }
 }

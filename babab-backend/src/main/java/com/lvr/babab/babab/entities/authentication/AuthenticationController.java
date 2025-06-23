@@ -18,9 +18,8 @@ public class AuthenticationController {
 
   @PostMapping("/register")
   public ResponseEntity<RegisterUserResponse> register(
-      @RequestBody @Valid RegisterUserRequestBody registerUserRequestBody) {
-    RegisterUserResponse registerUserResponse =
-        authenticationService.register(registerUserRequestBody);
+      @RequestBody @Valid RegisterUserRequest registerUserRequest) {
+    RegisterUserResponse registerUserResponse = authenticationService.register(registerUserRequest);
     URI location =
         ServletUriComponentsBuilder.fromCurrentRequest()
             .path("{/id}")
@@ -31,7 +30,7 @@ public class AuthenticationController {
 
   @PostMapping("/register-business-account")
   public ResponseEntity<RegisterUserResponse> registerBusinessAccount(
-      @RequestBody @Valid RegisterBusinessAccountRequestBody request) {
+      @RequestBody @Valid RegisterBusinessAccountRequest request) {
     RegisterUserResponse response = authenticationService.registerBusinessAccount(request);
     URI location =
         ServletUriComponentsBuilder.fromCurrentRequest()
