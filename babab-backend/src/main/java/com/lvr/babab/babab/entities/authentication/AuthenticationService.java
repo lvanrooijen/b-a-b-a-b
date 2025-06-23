@@ -11,6 +11,7 @@ import com.lvr.babab.babab.exceptions.authentication.FailedLoginException;
 import com.lvr.babab.babab.exceptions.authentication.FailedSendPasswordResetEmailException;
 import com.lvr.babab.babab.exceptions.authentication.PasswordMismatchException;
 import com.lvr.babab.babab.exceptions.users.DuplicateEmailException;
+import com.lvr.babab.babab.exceptions.users.RegisterExistingAccountException;
 import com.lvr.babab.babab.exceptions.users.UserNotFoundException;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
@@ -31,6 +32,7 @@ public class AuthenticationService implements UserDetailsManager {
   private final PasswordResetRequestService passwordResetRequestService;
   private final PasswordEncoder passwordEncoder;
   private final UserRepository userRepository;
+  private final BusinessAccountRepository businessAccountRepository;
   private final JwtService jwtService;
   private final MailService mailService;
 
@@ -176,6 +178,26 @@ public class AuthenticationService implements UserDetailsManager {
       throw new DuplicateEmailException(
           String.format(
               "[register failed] reason=email already registered, email=%s", requestBody.email()));
+    }
+
+    if (businessAccountRepository.findByKvkNumber(requestBody.kvkNumber()).isPresent()) {
+      throw new RegisterExistingAccountException(
+          String.format(
+              "[register failed] reason=KVK number is already registered, kvkNumber=%s",
+              requestBody.kvkNumber()),
+          String.format(
+              "A company with KVK number %s was already registered ", requestBody.kvkNumber()));
+    }
+
+    if (businessAccountRepository
+        .findByCompanyNameIgnoreCase(requestBody.companyName())
+        .isPresent()) {
+      throw new RegisterExistingAccountException(
+          String.format(
+              "[register failed] reason=Company name is already registered, companyName=%s",
+              requestBody.companyName()),
+          String.format(
+              "A Company by the name of %s was already registered", requestBody.companyName()));
     }
 
     User user =

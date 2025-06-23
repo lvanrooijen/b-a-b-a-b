@@ -1,5 +1,6 @@
 package com.lvr.babab.babab.entities.authentication.dto;
 
+import com.lvr.babab.babab.configurations.annotations.validators.password.Password;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import org.hibernate.validator.constraints.Length;
@@ -13,4 +14,4 @@ public record RegisterBusinessAccountRequest(
         @Positive(message = "KvK number must be a number, and can only contain positive numbers")
         String kvkNumber,
     String email,
-    String password) {}
+    @Password @NotBlank String password) {}

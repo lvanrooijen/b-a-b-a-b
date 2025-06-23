@@ -30,8 +30,7 @@ public class SecurityConfig {
         .authorizeHttpRequests(
             request ->
                 request
-                    .requestMatchers(
-                        "/api/v1/login", "/api/v1/register", "/api/v1/password-reset/*")
+                    .requestMatchers(SecurityRoutes.getOpenPostPaths())
                     .permitAll()
                     .requestMatchers(HttpMethod.PATCH, "/api/v1/**")
                     .authenticated()
