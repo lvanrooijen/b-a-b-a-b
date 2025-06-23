@@ -10,7 +10,7 @@ public class SqlSafeInputValidator implements ConstraintValidator<SqlSafeInput, 
   @Override
   public boolean isValid(String value, ConstraintValidatorContext context) {
     context.disableDefaultConstraintViolation();
-    if (checkForUnsafeCharacters(value) || checkForUnsafeKeywords(value)) {
+    if (containsUnsafeCharacters(value) || containsUnsafeKeywords(value)) {
       context
           .buildConstraintViolationWithTemplate("Input is vulnerable for sql injections")
           .addConstraintViolation();
@@ -20,14 +20,14 @@ public class SqlSafeInputValidator implements ConstraintValidator<SqlSafeInput, 
     }
   }
 
-  private boolean checkForUnsafeCharacters(String value) {
+  private boolean containsUnsafeCharacters(String value) {
     return value.contains("\"")
         || value.contains(";")
         || value.contains("'")
         || value.contains("--");
   }
 
-  private boolean checkForUnsafeKeywords(String value) {
+  private boolean containsUnsafeKeywords(String value) {
     String[] keywords = {"DROP", "SELECT", "DELETE", "INSERT", "UPDATE", "EXEC", "UNION", "XP_"};
     boolean containsKeyword = false;
     for (String keyword : keywords) {
