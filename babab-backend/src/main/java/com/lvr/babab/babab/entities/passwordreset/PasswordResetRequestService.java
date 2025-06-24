@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 public class PasswordResetRequestService {
   private final PasswordResetRequestRepository passwordResetRequestRepository;
 
+
   public PasswordResetRequest requestPasswordReset(User user) {
     PasswordResetRequest resetRequest =
         passwordResetRequestRepository

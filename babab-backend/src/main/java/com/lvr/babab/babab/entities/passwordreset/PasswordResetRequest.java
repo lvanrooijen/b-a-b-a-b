@@ -19,6 +19,7 @@ public class PasswordResetRequest {
     this.verificationCode = verificationCode;
     this.user = user;
     this.issuedAt = LocalDateTime.now();
+    this.isExpired = isExpired();
   }
 
   @Id @GeneratedValue Long id;
@@ -31,6 +32,9 @@ public class PasswordResetRequest {
 
   @ManyToOne(optional = false)
   User user;
+
+  @Column(nullable = false)
+  boolean isExpired;
 
   public Boolean isExpired() {
     return LocalDateTime.now().isAfter(issuedAt.minusMinutes(30));

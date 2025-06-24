@@ -14,10 +14,12 @@ import com.lvr.babab.babab.exceptions.users.DuplicateEmailException;
 import com.lvr.babab.babab.exceptions.users.RegisterExistingAccountException;
 import com.lvr.babab.babab.exceptions.users.UserNotFoundException;
 import jakarta.mail.MessagingException;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -26,6 +28,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService implements UserDetailsManager {
@@ -36,7 +39,7 @@ public class AuthenticationService implements UserDetailsManager {
   private final JwtService jwtService;
   private final MailService mailService;
 
-  public RegisterUserResponse register(@Valid RegisterUserRequest requestBody) {
+  public RegisterUserResponse registerUserAccount(@Valid RegisterUserRequest requestBody) {
     if (userExists(requestBody.email())) {
       throw new DuplicateEmailException(
           String.format(
@@ -50,6 +53,51 @@ public class AuthenticationService implements UserDetailsManager {
             .firstName(requestBody.firstname())
             .lastName(requestBody.lastname())
             .birthdate(requestBody.birthdate())
+            .role(Role.USER)
+            .createdOn(LocalDate.now())
+            .build();
+
+    createUser(user);
+
+    LoginResponse loginResponse = new LoginResponse(user.getId(), user.getEmail());
+    String token = jwtService.generateTokenForUser(user);
+
+    return new RegisterUserResponse(token, loginResponse);
+  }
+
+  public RegisterUserResponse registerBusinessAccount(RegisterBusinessAccountRequest requestBody) {
+    if (userExists(requestBody.email())) {
+      throw new DuplicateEmailException(
+          String.format(
+              "[register failed] reason=email already registered, email=%s", requestBody.email()));
+    }
+
+    if (businessAccountRepository.findByKvkNumber(requestBody.kvkNumber()).isPresent()) {
+      throw new RegisterExistingAccountException(
+          String.format(
+              "[register failed] reason=KVK number is already registered, kvkNumber=%s",
+              requestBody.kvkNumber()),
+          String.format(
+              "A company with KVK number %s was already registered ", requestBody.kvkNumber()));
+    }
+
+    if (businessAccountRepository
+        .findByCompanyNameIgnoreCase(requestBody.companyName())
+        .isPresent()) {
+      throw new RegisterExistingAccountException(
+          String.format(
+              "[register failed] reason=Company name is already registered, companyName=%s",
+              requestBody.companyName()),
+          String.format(
+              "A Company by the name of %s was already registered", requestBody.companyName()));
+    }
+
+    User user =
+        BusinessUser.builder()
+            .email(requestBody.email())
+            .password(passwordEncoder.encode(requestBody.password()))
+            .companyName(requestBody.companyName())
+            .kvkNumber(requestBody.kvkNumber())
             .role(Role.USER)
             .createdOn(LocalDate.now())
             .build();
@@ -140,6 +188,7 @@ public class AuthenticationService implements UserDetailsManager {
     return userRepository.findByEmailIgnoreCase(username).isPresent();
   }
 
+  @Transactional
   public void requestPasswordReset(Long id) {
     User user =
         userRepository
@@ -156,10 +205,12 @@ public class AuthenticationService implements UserDetailsManager {
     String resetUrl = generateResetUrl(resetRequest.getVerificationCode());
 
     try {
+
       String name =
           user instanceof CustomerUser
               ? ((CustomerUser) user).getFirstName()
               : ((BusinessUser) user).getCompanyName();
+
       mailService.sendPasswordResetEmail(user.getEmail(), name, resetUrl);
     } catch (MessagingException e) {
       throw new FailedSendPasswordResetEmailException(
@@ -171,50 +222,5 @@ public class AuthenticationService implements UserDetailsManager {
 
   private String generateResetUrl(UUID resetCode) {
     return String.format("http://www.babab.com/%s", resetCode);
-  }
-
-  public RegisterUserResponse registerBusinessAccount(RegisterBusinessAccountRequest requestBody) {
-    if (userExists(requestBody.email())) {
-      throw new DuplicateEmailException(
-          String.format(
-              "[register failed] reason=email already registered, email=%s", requestBody.email()));
-    }
-
-    if (businessAccountRepository.findByKvkNumber(requestBody.kvkNumber()).isPresent()) {
-      throw new RegisterExistingAccountException(
-          String.format(
-              "[register failed] reason=KVK number is already registered, kvkNumber=%s",
-              requestBody.kvkNumber()),
-          String.format(
-              "A company with KVK number %s was already registered ", requestBody.kvkNumber()));
-    }
-
-    if (businessAccountRepository
-        .findByCompanyNameIgnoreCase(requestBody.companyName())
-        .isPresent()) {
-      throw new RegisterExistingAccountException(
-          String.format(
-              "[register failed] reason=Company name is already registered, companyName=%s",
-              requestBody.companyName()),
-          String.format(
-              "A Company by the name of %s was already registered", requestBody.companyName()));
-    }
-
-    User user =
-        BusinessUser.builder()
-            .email(requestBody.email())
-            .password(passwordEncoder.encode(requestBody.password()))
-            .companyName(requestBody.companyName())
-            .kvkNumber(requestBody.kvkNumber())
-            .role(Role.USER)
-            .createdOn(LocalDate.now())
-            .build();
-
-    createUser(user);
-
-    LoginResponse loginResponse = new LoginResponse(user.getId(), user.getEmail());
-    String token = jwtService.generateTokenForUser(user);
-
-    return new RegisterUserResponse(token, loginResponse);
   }
 }

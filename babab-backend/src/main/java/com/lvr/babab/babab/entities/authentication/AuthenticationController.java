@@ -19,7 +19,8 @@ public class AuthenticationController {
   @PostMapping("/register")
   public ResponseEntity<RegisterUserResponse> register(
       @RequestBody @Valid RegisterUserRequest registerUserRequest) {
-    RegisterUserResponse registerUserResponse = authenticationService.register(registerUserRequest);
+    RegisterUserResponse registerUserResponse =
+        authenticationService.registerUserAccount(registerUserRequest);
     URI location =
         ServletUriComponentsBuilder.fromCurrentRequest()
             .path("{/id}")
@@ -42,9 +43,7 @@ public class AuthenticationController {
 
   @PostMapping("/login")
   public ResponseEntity<JwtToken> login(@RequestBody LoginRequest loginRequest) {
-
     JwtToken token = authenticationService.login(loginRequest);
-
     return ResponseEntity.ok(token);
   }
 

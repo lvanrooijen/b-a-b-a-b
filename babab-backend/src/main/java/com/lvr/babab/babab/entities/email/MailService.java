@@ -3,6 +3,7 @@ package com.lvr.babab.babab.entities.email;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class MailService {
@@ -37,7 +39,6 @@ public class MailService {
     helper.setTo(to);
     helper.setSubject("Password Reset Request");
     helper.setText(body, true);
-
     mailSender.send(message);
   }
 }
