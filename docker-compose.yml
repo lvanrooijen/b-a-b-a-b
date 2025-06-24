@@ -30,31 +30,6 @@ services:
       - babab-net
     restart: unless-stopped
 
-  mongodb:
-    container_name: ms_mongo_db
-    image: mongo
-    ports:
-      - 27017:27017
-    volumes:
-      - mongo:/data
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: laila
-      MONGO_INITDB_ROOT_PASSWORD: laila
-    networks:
-      - babab-net
-
-  mongo-express:
-    container_name: babab_mongo_express
-    image: mongo-express
-    restart: always
-    ports:
-      - 8081:8081
-    networks:
-      - babab-net
-    environment:
-      - ME_CONFIG_MONGODB_ADMINUSERNAME=laila
-      - ME_CONFIG_MONGODB_ADMINPASSWORD=laila
-      - ME_CONFIG_MONGODB_SERVER=mongodb
 
   mail-dev:
     container_name: babab_mail_dev
@@ -62,6 +37,10 @@ services:
     ports:
       - 1080:1080
       - 1025:1025
+    networks:
+      - babab-net
+    environment:
+      - MAILDEV_SMTP_BIND_ADDRESS=0.0.0.0
 
 networks:
   babab-net:
@@ -70,4 +49,3 @@ networks:
 volumes:
   postgres:
   pgadmin:
-  mongo:

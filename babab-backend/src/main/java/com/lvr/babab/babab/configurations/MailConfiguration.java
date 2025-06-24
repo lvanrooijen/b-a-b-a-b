@@ -10,7 +10,10 @@ import org.thymeleaf.TemplateEngine;
 public class MailConfiguration {
   @Bean
   public JavaMailSender getMailSender() {
-    return new JavaMailSenderImpl();
+    JavaMailSenderImpl mailSender = new JavaMailSenderImpl();
+    mailSender.setHost("localhost");
+    mailSender.setPort(1025);
+    return mailSender;
   }
 
   @Bean
