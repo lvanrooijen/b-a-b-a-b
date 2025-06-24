@@ -1,8 +1,0 @@
-- Spring security, als je hasRole gebruikt bij method security
-(@preAuthorize etc.maar ook via die filterchain zelf) verwacht bij rollen een prefix: ROLE_
-
-- Admin word nu via de seeder in de database gezet, maar dat is niet handig. Dus even uitzoeken hoe dat hoort.
-
-- Spring validation is toegevoegd, moet wel nog exception handler voor gefixed worden. so TODO me DADDY! (kut humor)
-
-- patch user werkt niet omdat hij om de een of andere reden die userRepository.findById() niet werkt ook al bestaat de id wel. dus even uitvogelen wat daar aan de hand is!
