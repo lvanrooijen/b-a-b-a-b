@@ -52,4 +52,11 @@ public class AuthenticationController {
     authenticationService.requestPasswordReset(id);
     return ResponseEntity.ok().build();
   }
+
+  @PostMapping("/password-new/{token}")
+  public ResponseEntity<Void> resetPassword(
+      @PathVariable String token, @Valid @RequestBody UserPasswordResetRequest requestBody) {
+    authenticationService.resetPassword(token, requestBody);
+    return ResponseEntity.ok().build();
+  }
 }

@@ -5,11 +5,10 @@ import com.lvr.babab.babab.configurations.security.JwtToken;
 import com.lvr.babab.babab.entities.authentication.dto.*;
 import com.lvr.babab.babab.entities.email.MailService;
 import com.lvr.babab.babab.entities.passwordreset.PasswordResetRequest;
+import com.lvr.babab.babab.entities.passwordreset.PasswordResetRequestRepository;
 import com.lvr.babab.babab.entities.passwordreset.PasswordResetRequestService;
 import com.lvr.babab.babab.entities.users.*;
-import com.lvr.babab.babab.exceptions.authentication.FailedLoginException;
-import com.lvr.babab.babab.exceptions.authentication.FailedSendPasswordResetEmailException;
-import com.lvr.babab.babab.exceptions.authentication.PasswordMismatchException;
+import com.lvr.babab.babab.exceptions.authentication.*;
 import com.lvr.babab.babab.exceptions.users.DuplicateEmailException;
 import com.lvr.babab.babab.exceptions.users.RegisterExistingAccountException;
 import com.lvr.babab.babab.exceptions.users.UserNotFoundException;
@@ -33,6 +32,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class AuthenticationService implements UserDetailsManager {
   private final PasswordResetRequestService passwordResetRequestService;
+  private final PasswordResetRequestRepository passwordResetRequestRepository;
   private final PasswordEncoder passwordEncoder;
   private final UserRepository userRepository;
   private final BusinessAccountRepository businessAccountRepository;
@@ -221,6 +221,34 @@ public class AuthenticationService implements UserDetailsManager {
   }
 
   private String generateResetUrl(UUID resetCode) {
-    return String.format("http://www.babab.com/%s", resetCode);
+    return String.format("https://www.babab.com/password-new/%s", resetCode);
+  }
+
+  public void resetPassword(String token, UserPasswordResetRequest requestBody) {
+    User user =
+        userRepository
+            .findByEmailIgnoreCase(requestBody.email())
+            .orElseThrow(
+                () ->
+                    new UsernameNotFoundException(
+                        String.format(
+                            "[failed to update password] reason=user by this email is can not be found email=[%s]",
+                            requestBody.email())));
+
+    PasswordResetRequest resetRequest =
+        passwordResetRequestRepository
+            .findByUser(user)
+            .orElseThrow(
+                () ->
+                    new PasswordRequestNotFound(
+                        String.format("[failed to update password] reason=[invalid reset token]")));
+
+    if (!token.equals(resetRequest.getVerificationCode().toString())) {
+      throw new ForbiddenException("[failed to reset password] reason=invalid reset code]");
+    }
+
+    user.setPassword(passwordEncoder.encode(requestBody.password()));
+    userRepository.save(user);
+    passwordResetRequestRepository.delete(resetRequest);
   }
 }

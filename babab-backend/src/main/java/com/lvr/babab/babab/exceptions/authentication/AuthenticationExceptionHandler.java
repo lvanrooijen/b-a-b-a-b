@@ -70,4 +70,11 @@ public class AuthenticationExceptionHandler {
     log.warn("[exception] type=[AdminOnlyException, message={}]", e.getMessage());
     return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Admin only action");
   }
+
+  @ExceptionHandler(PasswordRequestNotFound.class)
+  public ProblemDetail handlePasswordRequestNotFound(PasswordRequestNotFound e) {
+    log.warn("[exception] type=[PasswordRequestNotFoundException, message={}]", e.getMessage());
+    return ProblemDetail.forStatusAndDetail(
+        HttpStatus.BAD_REQUEST, "Invalid token, request a new password reset");
+  }
 }
