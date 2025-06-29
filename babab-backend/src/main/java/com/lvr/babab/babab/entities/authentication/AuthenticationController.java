@@ -17,22 +17,22 @@ public class AuthenticationController {
   private final AuthenticationService authenticationService;
 
   @PostMapping("/register")
-  public ResponseEntity<RegisterUserResponse> register(
+  public ResponseEntity<AuthenticatedResponse> register(
       @RequestBody @Valid RegisterUserRequest registerUserRequest) {
-    RegisterUserResponse registerUserResponse =
+    AuthenticatedResponse authenticatedResponse =
         authenticationService.registerUserAccount(registerUserRequest);
     URI location =
         ServletUriComponentsBuilder.fromCurrentRequest()
             .path("{/id}")
-            .buildAndExpand(registerUserResponse.user().id())
+            .buildAndExpand(authenticatedResponse.user().id())
             .toUri();
-    return ResponseEntity.created(location).body(registerUserResponse);
+    return ResponseEntity.created(location).body(authenticatedResponse);
   }
 
   @PostMapping("/register-business-account")
-  public ResponseEntity<RegisterUserResponse> registerBusinessAccount(
+  public ResponseEntity<AuthenticatedResponse> registerBusinessAccount(
       @RequestBody @Valid RegisterBusinessAccountRequest request) {
-    RegisterUserResponse response = authenticationService.registerBusinessAccount(request);
+    AuthenticatedResponse response = authenticationService.registerBusinessAccount(request);
     URI location =
         ServletUriComponentsBuilder.fromCurrentRequest()
             .path("{/id}")

@@ -39,7 +39,7 @@ public class AuthenticationService implements UserDetailsManager {
   private final JwtService jwtService;
   private final MailService mailService;
 
-  public RegisterUserResponse registerUserAccount(@Valid RegisterUserRequest requestBody) {
+  public AuthenticatedResponse registerUserAccount(@Valid RegisterUserRequest requestBody) {
     if (userExists(requestBody.email())) {
       throw new DuplicateEmailException(
           String.format(
@@ -59,13 +59,13 @@ public class AuthenticationService implements UserDetailsManager {
 
     createUser(user);
 
-    LoginResponse loginResponse = new LoginResponse(user.getId(), user.getEmail());
+    BasicUserResponse basicUserResponse = new BasicUserResponse(user.getId(), user.getEmail());
     String token = jwtService.generateTokenForUser(user);
 
-    return new RegisterUserResponse(token, loginResponse);
+    return new AuthenticatedResponse(token, basicUserResponse);
   }
 
-  public RegisterUserResponse registerBusinessAccount(RegisterBusinessAccountRequest requestBody) {
+  public AuthenticatedResponse registerBusinessAccount(RegisterBusinessAccountRequest requestBody) {
     if (userExists(requestBody.email())) {
       throw new DuplicateEmailException(
           String.format(
@@ -104,10 +104,10 @@ public class AuthenticationService implements UserDetailsManager {
 
     createUser(user);
 
-    LoginResponse loginResponse = new LoginResponse(user.getId(), user.getEmail());
+    BasicUserResponse basicUserResponse = new BasicUserResponse(user.getId(), user.getEmail());
     String token = jwtService.generateTokenForUser(user);
 
-    return new RegisterUserResponse(token, loginResponse);
+    return new AuthenticatedResponse(token, basicUserResponse);
   }
 
   public JwtToken login(LoginRequest requestBody) {
