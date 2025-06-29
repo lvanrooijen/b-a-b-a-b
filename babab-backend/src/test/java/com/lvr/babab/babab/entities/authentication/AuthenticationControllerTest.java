@@ -32,13 +32,19 @@ class AuthenticationControllerTest {
   @MockitoBean JwtService jwtService;
 
   @Test
-  void register_should_return_created_status_code() throws Exception {
+  void register_should_return_created() throws Exception {
     RegisterUserRequest userRequest =
         new RegisterUserRequest(
-            "test@email.com", "password123!", "lullaby", "bapbap", LocalDate.of(1952, 1, 1));
+            "Calvin_Cordozar_Broadus_Jr.@email.nl@email.com",
+            "password123!",
+            "snoop",
+            "dogg",
+            LocalDate.of(1980, 1, 10));
 
     AuthenticatedResponse mockResponse =
-        new AuthenticatedResponse("mocked-jwt-token", new BasicUserResponse(1L, "test@mail.com"));
+        new AuthenticatedResponse(
+            "mocked-jwt-token",
+            new BasicUserResponse(1L, "Calvin_Cordozar_Broadus_Jr.@email.nl@mail.com"));
 
     Mockito.when(authenticationService.registerUserAccount(Mockito.any())).thenReturn(mockResponse);
 
@@ -54,9 +60,45 @@ class AuthenticationControllerTest {
                         "password":"Password123!",
                         "firstname":"snoop",
                         "lastname":"dogg",
-                        "birthdate": "1980-01-10"
+                        "birthdate": "1080-01-10"
                     }
                     """))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.title").value("Validation Failed"));
+  }
+
+  @Test
+  void register_user_older_then_150_should_return_created_bad_request() throws Exception {
+    RegisterUserRequest userRequest =
+        new RegisterUserRequest(
+            "Calvin_Cordozar_Broadus_Jr.@email.nl@email.com",
+            "password123!",
+            "snoop",
+            "dogg",
+            LocalDate.of(1980, 1, 10));
+
+    AuthenticatedResponse mockResponse =
+        new AuthenticatedResponse(
+            "mocked-jwt-token",
+            new BasicUserResponse(1L, "Calvin_Cordozar_Broadus_Jr.@email.nl@mail.com"));
+
+    Mockito.when(authenticationService.registerUserAccount(Mockito.any())).thenReturn(mockResponse);
+
+    mockMvc
+        .perform(
+            post("/api/v1/register")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                                    {
+                                        "email":"Calvin_Cordozar_Broadus_Jr.@email.nl",
+                                        "password":"Password123!",
+                                        "firstname":"snoop",
+                                        "lastname":"dogg",
+                                        "birthdate": "1980-01-10"
+                                    }
+                                    """))
         .andExpect(status().isCreated())
         .andExpect(jsonPath("$.token").value("mocked-jwt-token"));
   }

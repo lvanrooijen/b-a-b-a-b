@@ -22,8 +22,8 @@ public class AuthenticationController {
     AuthenticatedResponse authenticatedResponse =
         authenticationService.registerUserAccount(registerUserRequest);
     URI location =
-        ServletUriComponentsBuilder.fromCurrentRequest()
-            .path("{/id}")
+        ServletUriComponentsBuilder.fromCurrentContextPath()
+            .path("{user/id}")
             .buildAndExpand(authenticatedResponse.user().id())
             .toUri();
     return ResponseEntity.created(location).body(authenticatedResponse);
@@ -34,8 +34,8 @@ public class AuthenticationController {
       @RequestBody @Valid RegisterBusinessAccountRequest request) {
     AuthenticatedResponse response = authenticationService.registerBusinessAccount(request);
     URI location =
-        ServletUriComponentsBuilder.fromCurrentRequest()
-            .path("{/id}")
+        ServletUriComponentsBuilder.fromCurrentContextPath()
+            .path("{user/id}")
             .buildAndExpand(response.user().id())
             .toUri();
     return ResponseEntity.created(location).body(response);

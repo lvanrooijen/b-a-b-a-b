@@ -1,5 +1,7 @@
 package com.lvr.babab.babab.exceptions.authentication;
 
+import static com.lvr.babab.babab.exceptions.ProblemTypes.*;
+
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
@@ -25,8 +27,8 @@ public class AuthenticationExceptionHandler {
     String message = "Invalid Request Body";
     log.warn("[exception] type=MethodArgumentNotValidException, message={}", message);
     ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, message);
-    problemDetail.setProperty("invalid-fields", errors);
-
+    problemDetail.setProperty("errors", errors);
+    problemDetail.setType(VALIDATION_ERROR);
     return problemDetail;
   }
 
@@ -34,47 +36,68 @@ public class AuthenticationExceptionHandler {
   public ProblemDetail handleFailedSendPasswordResetEmailException(
       FailedSendPasswordResetEmailException e) {
     log.warn("[exception] type=FailedSendPasswordResetEmailException, message={}", e.getMessage());
-    return ProblemDetail.forStatusAndDetail(
-        HttpStatus.BAD_REQUEST, "Something went wrong try again later");
+
+    ProblemDetail problemDetail =
+        ProblemDetail.forStatusAndDetail(
+            HttpStatus.BAD_REQUEST, "Something went wrong try again later");
+    problemDetail.setType(FAILED_PASSWORD_RESET_EMAIL_REQUEST);
+    return problemDetail;
   }
 
   @ExceptionHandler(PendingPasswordResetRequestException.class)
   public ProblemDetail handlePendingPasswordResetRequestException(
       PendingPasswordResetRequestException e) {
     log.warn("[exception] type=PendingPasswordResetRequestException, message={}", e.getMessage());
-    return ProblemDetail.forStatusAndDetail(
-        HttpStatus.BAD_REQUEST, "Wait " + e.duration + " minutes");
+    ProblemDetail problemDetail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Wait " + e.duration + " minutes");
+    problemDetail.setType(PENDING_PASSWORD_RESET_REQUEST);
+    return problemDetail;
   }
 
   @ExceptionHandler(ForbiddenException.class)
   public ProblemDetail handleForbiddenException(ForbiddenException e) {
     log.warn("[exception] type=ForbiddenException, message={}", e.getMessage());
-    return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, e.getMessage());
+    ProblemDetail problemDetail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, e.getMessage());
+    problemDetail.setType(FORBIDDEN);
+    return problemDetail;
   }
 
   @ExceptionHandler(FailedLoginException.class)
   public ProblemDetail handleFailedLoginException(FailedLoginException e) {
     log.warn("[exception] type=FailedLoginException, message={}", e.getMessage());
-    return ProblemDetail.forStatusAndDetail(
-        HttpStatus.BAD_REQUEST, "username or password is incorrect");
+    ProblemDetail problemDetail =
+        ProblemDetail.forStatusAndDetail(
+            HttpStatus.BAD_REQUEST, "username or password is incorrect");
+    problemDetail.setType(FAILED_LOGIN);
+    return problemDetail;
   }
 
   @ExceptionHandler(PasswordMismatchException.class)
   public ProblemDetail handlePasswordMismatchException(PasswordMismatchException e) {
     log.warn("[exception] type=[PasswordMismatchException, message={}]", e.getMessage());
-    return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Password is incorrect");
+    ProblemDetail problemDetail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "Password is incorrect");
+    problemDetail.setType(PASSWORD_MISMATCH);
+    return problemDetail;
   }
 
   @ExceptionHandler(AdminOnlyActionException.class)
   public ProblemDetail handleAdminOnlyException(AdminOnlyActionException e) {
     log.warn("[exception] type=[AdminOnlyException, message={}]", e.getMessage());
-    return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Admin only action");
+    ProblemDetail problemDetail =
+        ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Admin only action");
+    problemDetail.setType(ADMIN_ONLY);
+    return problemDetail;
   }
 
   @ExceptionHandler(PasswordRequestNotFound.class)
   public ProblemDetail handlePasswordRequestNotFound(PasswordRequestNotFound e) {
     log.warn("[exception] type=[PasswordRequestNotFoundException, message={}]", e.getMessage());
-    return ProblemDetail.forStatusAndDetail(
-        HttpStatus.BAD_REQUEST, "Invalid token, request a new password reset");
+    ProblemDetail problemDetail =
+        ProblemDetail.forStatusAndDetail(
+            HttpStatus.BAD_REQUEST, "Invalid token, request a new password reset");
+    problemDetail.setType(PASSWORD_RESET_REQUEST_NOT_FOUND);
+    return problemDetail;
   }
 }
