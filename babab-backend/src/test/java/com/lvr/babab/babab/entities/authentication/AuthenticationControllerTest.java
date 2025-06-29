@@ -9,8 +9,6 @@ import com.lvr.babab.babab.configurations.security.JwtService;
 import com.lvr.babab.babab.configurations.security.SecurityConfig;
 import com.lvr.babab.babab.entities.authentication.dto.AuthenticatedResponse;
 import com.lvr.babab.babab.entities.authentication.dto.BasicUserResponse;
-import com.lvr.babab.babab.entities.authentication.dto.RegisterUserRequest;
-import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
@@ -33,18 +31,9 @@ class AuthenticationControllerTest {
 
   @Test
   void register_should_return_created() throws Exception {
-    RegisterUserRequest userRequest =
-        new RegisterUserRequest(
-            "Calvin_Cordozar_Broadus_Jr.@email.nl@email.com",
-            "password123!",
-            "snoop",
-            "dogg",
-            LocalDate.of(1980, 1, 10));
-
     AuthenticatedResponse mockResponse =
         new AuthenticatedResponse(
-            "mocked-jwt-token",
-            new BasicUserResponse(1L, "Calvin_Cordozar_Broadus_Jr.@email.nl@mail.com"));
+            "mocked-jwt-token", new BasicUserResponse(1L, "Calvin_Cordozar_Broadus_Jr@mail.com"));
 
     Mockito.when(authenticationService.registerUserAccount(Mockito.any())).thenReturn(mockResponse);
 
@@ -56,31 +45,22 @@ class AuthenticationControllerTest {
                 .content(
                     """
                     {
-                        "email":"Calvin_Cordozar_Broadus_Jr.@email.nl",
+                        "email":"Calvin_Cordozar_Broadus_Jr@email.nl",
                         "password":"Password123!",
                         "firstname":"snoop",
                         "lastname":"dogg",
-                        "birthdate": "1080-01-10"
+                        "birthdate": "1980-01-10"
                     }
                     """))
-        .andExpect(status().isBadRequest())
-        .andExpect(jsonPath("$.title").value("Validation Failed"));
+        .andExpect(status().isCreated())
+        .andExpect(jsonPath("$.token").value("mocked-jwt-token"));
   }
 
   @Test
   void register_user_older_then_150_should_return_created_bad_request() throws Exception {
-    RegisterUserRequest userRequest =
-        new RegisterUserRequest(
-            "Calvin_Cordozar_Broadus_Jr.@email.nl@email.com",
-            "password123!",
-            "snoop",
-            "dogg",
-            LocalDate.of(1980, 1, 10));
-
     AuthenticatedResponse mockResponse =
         new AuthenticatedResponse(
-            "mocked-jwt-token",
-            new BasicUserResponse(1L, "Calvin_Cordozar_Broadus_Jr.@email.nl@mail.com"));
+            "mocked-jwt-token", new BasicUserResponse(1L, "Calvin_Cordozar_Broadus_Jr@mail.com"));
 
     Mockito.when(authenticationService.registerUserAccount(Mockito.any())).thenReturn(mockResponse);
 
@@ -96,11 +76,12 @@ class AuthenticationControllerTest {
                                         "password":"Password123!",
                                         "firstname":"snoop",
                                         "lastname":"dogg",
-                                        "birthdate": "1980-01-10"
+                                        "birthdate": "1001-01-10"
                                     }
                                     """))
-        .andExpect(status().isCreated())
-        .andExpect(jsonPath("$.token").value("mocked-jwt-token"));
+        .andExpect(status().isBadRequest())
+        .andExpect(
+            jsonPath("$.errors.birthdate").value("Oke Vlad The Impaler, you're a +150 years old"));
   }
 
   @Test
