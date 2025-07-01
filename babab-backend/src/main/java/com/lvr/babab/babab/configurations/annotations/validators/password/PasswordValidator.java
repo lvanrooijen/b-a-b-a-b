@@ -36,7 +36,7 @@ public class PasswordValidator implements ConstraintValidator<Password, String> 
     }
 
     if (containsBlankSpace(value)) {
-      setErrorMessage(context, "Password must contain at least 1 blank space");
+      setErrorMessage(context, "Password may not contain blank spaces");
       return false;
     }
 
