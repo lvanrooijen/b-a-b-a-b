@@ -71,6 +71,25 @@ public class MockDataAuthentication {
            """;
   }
 
+  public static String getUserLoginPayloadValid() {
+    return """
+           {
+              "email":"greencookie@monsterinc.com",
+              "password":"Password123!"
+           }
+           """;
+  }
+
+  public static String getPasswordChangePayloadValid() {
+    return """
+           {
+               "email":"test@email.com",
+               "password":"SecurePassword123!",
+               "confirmPassword":"SecurePassword123!"
+           }
+           """;
+  }
+
   public static AuthenticatedResponse getGetUserMockedResponse() {
     return new AuthenticatedResponse(
         "mocked-jwt-token", new BasicUserResponse(1L, "default@email.com"));

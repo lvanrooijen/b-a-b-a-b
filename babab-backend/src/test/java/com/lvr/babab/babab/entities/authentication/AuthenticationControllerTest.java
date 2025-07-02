@@ -1,5 +1,6 @@
 package com.lvr.babab.babab.entities.authentication;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -8,6 +9,8 @@ import com.lvr.babab.babab.configurations.security.CorsConfig;
 import com.lvr.babab.babab.configurations.security.JwtService;
 import com.lvr.babab.babab.configurations.security.SecurityConfig;
 import com.lvr.babab.babab.entities.authentication.dto.AuthenticatedResponse;
+import com.lvr.babab.babab.exceptions.authentication.FailedLoginException;
+import com.lvr.babab.babab.exceptions.authentication.PasswordRequestNotFound;
 import com.lvr.babab.babab.util.TestUtilities;
 import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -20,16 +23,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(controllers = AuthenticationController.class)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-@Import({SecurityConfig.class, CorsConfig.class})
+@Import({SecurityConfig.class, CorsConfig.class}) // TODO alternatief voor dit zoeken
 class AuthenticationControllerTest {
   private final String baseEndpoint = "/api/v1/";
   private final String registerEndpoint = baseEndpoint + "register";
   private final String registerBusinessAccountEndpoint = baseEndpoint + "register-business-account";
+  private final String loginEndpoint = baseEndpoint + "login";
+  private final String passwordResetRequestEndpoint = baseEndpoint + "/password-reset/1";
+  private final String changePasswordEndpoint =
+      baseEndpoint
+          + "/password-new/c4c25f71-9184-4dc4-82e8-edebe7315751"; // contains fake UUID as id
 
   @Autowired MockMvc mockMvc;
   @MockitoBean AuthenticationService authenticationService;
@@ -41,7 +51,7 @@ class AuthenticationControllerTest {
     AuthenticatedResponse mockResponse =
         MockDataAuthentication.getGetUserMockedResponse("Calvin_Cordozar_Broadus_Jr@mail.com");
 
-    Mockito.when(authenticationService.registerUserAccount(Mockito.any())).thenReturn(mockResponse);
+    Mockito.when(authenticationService.registerUserAccount(any())).thenReturn(mockResponse);
 
     mockMvc
         .perform(
@@ -144,8 +154,7 @@ class AuthenticationControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     MockDataAuthentication.getUserPayloadCustom(
-                        "password",
-                        "Password1231231231231231231231231231231231231231231231231231231231231231231231231231231231231231231231231231231232131231231231231231!")))
+                        "password", TestUtilities.getRandomString(32))))
         .andExpect(status().isBadRequest())
         .andExpect(
             jsonPath("$.errors.password")
@@ -254,8 +263,7 @@ class AuthenticationControllerTest {
     AuthenticatedResponse mockResponse =
         MockDataAuthentication.getGetUserMockedResponse("greencookie@monsterinc.com");
 
-    Mockito.when(authenticationService.registerBusinessAccount(Mockito.any()))
-        .thenReturn(mockResponse);
+    Mockito.when(authenticationService.registerBusinessAccount(any())).thenReturn(mockResponse);
 
     mockMvc
         .perform(
@@ -316,11 +324,99 @@ class AuthenticationControllerTest {
   }
 
   @Test
-  void login() {}
+  void login_succes_should_return_jwt() throws Exception {
+    AuthenticatedResponse mockResponse =
+        MockDataAuthentication.getGetUserMockedResponse("Calvin_Cordozar_Broadus_Jr@mail.com");
+
+    Mockito.when(authenticationService.login(any())).thenReturn(mockResponse);
+    mockMvc
+        .perform(
+            post(loginEndpoint)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(MockDataAuthentication.getUserLoginPayloadValid()))
+        .andExpect(status().is2xxSuccessful())
+        .andExpect(jsonPath("$.token").value("mocked-jwt-token"));
+  }
 
   @Test
-  void requestPasswordReset() {}
+  void login_failed_should_return_bad_request() throws Exception {
+    Mockito.when(authenticationService.login(any())).thenThrow(FailedLoginException.class);
+    mockMvc
+        .perform(
+            post(loginEndpoint)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(MockDataAuthentication.getUserLoginPayloadValid()))
+        .andExpect(status().isBadRequest());
+  }
 
   @Test
-  void resetPassword() {}
+  void request_password_reset_succes_should_return_ok() throws Exception {
+    mockMvc
+        .perform(
+            post(passwordResetRequestEndpoint).with(csrf()).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().is2xxSuccessful());
+  }
+
+  @Test
+  void request_password_reset_failed_should_return_bad_request() throws Exception {
+    Mockito.doThrow(UsernameNotFoundException.class)
+        .when(authenticationService)
+        .requestPasswordReset(any());
+    mockMvc
+        .perform(
+            post(passwordResetRequestEndpoint).with(csrf()).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  void request_password_reset_succesfully_should_return_ok() throws Exception {
+    mockMvc
+        .perform(
+            post(changePasswordEndpoint)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(MockDataAuthentication.getPasswordChangePayloadValid()))
+        .andExpect(status().is2xxSuccessful());
+  }
+
+  @Test
+  void request_password_reset_without_request_body_should_return_bad_request() throws Exception {
+    Mockito.doThrow(HttpMessageNotReadableException.class)
+        .when(authenticationService)
+        .resetPassword(any(), any());
+    mockMvc
+        .perform(post(changePasswordEndpoint).with(csrf()).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.detail").value("Invalid or Missing request body"));
+  }
+
+  @Test
+  void request_password_reset_user_not_found_should_return_bad_request() throws Exception {
+    Mockito.doThrow(UsernameNotFoundException.class)
+        .when(authenticationService)
+        .resetPassword(any(), any());
+
+    mockMvc
+        .perform(post(changePasswordEndpoint).with(csrf()).contentType(MediaType.APPLICATION_JSON))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.detail").value("Invalid or Missing request body"));
+  }
+
+  @Test
+  void request_password_reset_request_not_found_should_return_bad_request() throws Exception {
+    Mockito.doThrow(PasswordRequestNotFound.class)
+        .when(authenticationService)
+        .resetPassword(any(), any());
+
+    mockMvc
+        .perform(
+            post(changePasswordEndpoint)
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(MockDataAuthentication.getPasswordChangePayloadValid()))
+        .andExpect(status().isBadRequest())
+        .andExpect(jsonPath("$.detail").value("Invalid token, request a new password reset"));
+  }
 }

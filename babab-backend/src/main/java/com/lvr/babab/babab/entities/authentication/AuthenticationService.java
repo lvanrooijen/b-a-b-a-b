@@ -1,7 +1,6 @@
 package com.lvr.babab.babab.entities.authentication;
 
 import com.lvr.babab.babab.configurations.security.JwtService;
-import com.lvr.babab.babab.configurations.security.JwtToken;
 import com.lvr.babab.babab.entities.authentication.dto.*;
 import com.lvr.babab.babab.entities.email.MailService;
 import com.lvr.babab.babab.entities.passwordreset.PasswordResetRequest;
@@ -110,7 +109,7 @@ public class AuthenticationService implements UserDetailsManager {
     return new AuthenticatedResponse(token, basicUserResponse);
   }
 
-  public JwtToken login(LoginRequest requestBody) {
+  public AuthenticatedResponse login(LoginRequest requestBody) {
     User user =
         userRepository
             .findByEmailIgnoreCase(requestBody.email())
@@ -122,7 +121,8 @@ public class AuthenticationService implements UserDetailsManager {
                             requestBody.email())));
 
     if (passwordEncoder.matches(requestBody.password(), user.getPassword())) {
-      return new JwtToken(jwtService.generateTokenForUser(user));
+      return
+              new AuthenticatedResponse(jwtService.generateTokenForUser(user),new BasicUserResponse(user.getId(), user.getEmail()));
     } else {
       throw new FailedLoginException(
           String.format(

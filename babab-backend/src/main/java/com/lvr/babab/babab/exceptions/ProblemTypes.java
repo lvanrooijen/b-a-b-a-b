@@ -18,4 +18,5 @@ public class ProblemTypes {
   public static final URI ADMIN_ONLY = URI.create(BASE_ROUTE + "/admin-only");
   public static final URI PASSWORD_RESET_REQUEST_NOT_FOUND =
       URI.create(BASE_ROUTE + "/password-reset-request-not-found");
+  public static final URI INVALID_REQUEST_BODY = URI.create(BASE_ROUTE + "/invalid-request-body");
 }

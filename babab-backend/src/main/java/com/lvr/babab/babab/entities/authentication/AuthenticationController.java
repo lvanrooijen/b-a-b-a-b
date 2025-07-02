@@ -1,7 +1,6 @@
 package com.lvr.babab.babab.entities.authentication;
 
 import com.lvr.babab.babab.configurations.Routes;
-import com.lvr.babab.babab.configurations.security.JwtToken;
 import com.lvr.babab.babab.entities.authentication.dto.*;
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -42,9 +41,9 @@ public class AuthenticationController {
   }
 
   @PostMapping("/login")
-  public ResponseEntity<JwtToken> login(@RequestBody LoginRequest loginRequest) {
-    JwtToken token = authenticationService.login(loginRequest);
-    return ResponseEntity.ok(token);
+  public ResponseEntity<AuthenticatedResponse> login(@RequestBody LoginRequest loginRequest) {
+    AuthenticatedResponse response = authenticationService.login(loginRequest);
+    return ResponseEntity.ok(response);
   }
 
   @PostMapping("/password-reset/{id}")
