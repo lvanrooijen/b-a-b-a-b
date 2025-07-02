@@ -8,7 +8,7 @@ import org.hibernate.validator.constraints.Length;
 
 public record RegisterBusinessAccountRequest(
     @NotBlank(message = "Company Name is required")
-        @Length(min = 1, max = 250, message = "Company name must be between 1 and 250 characters")
+        @Length(min = 3, max = 250, message = "Company name must be between 3 and 250 characters")
         String companyName,
     @NotBlank(message = "KVK number is required")
         @Length(min = 8, max = 8, message = "Kvk number must be 8 characters")

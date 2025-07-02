@@ -13,10 +13,10 @@ public record RegisterUserRequest(
     @NotBlank @Email(message = "Invalid email address") String email,
     @NotBlank @Password String password,
     @NotBlank(message = "First name is required")
-        @Length(min = 1, max = 50, message = "First name must be between 1 and 50 characters")
+        @Length(min = 3, max = 50, message = "First name must be between 3 and 50 characters")
         String firstname,
     @NotBlank(message = "Last name is required")
-        @Length(min = 1, max = 100, message = "Last name must be between 1 and 100 characters")
+        @Length(min = 3, max = 100, message = "Last name must be between 3 and 100 characters")
         String lastname,
     @NotNull(message = "birthdate is required")
         @MinAge(value = 18, message = "Minimum age of 18 required")
