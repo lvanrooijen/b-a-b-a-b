@@ -38,7 +38,7 @@ public class AuthenticationService implements UserDetailsManager {
   private final JwtService jwtService;
   private final MailService mailService;
 
-  public AuthenticatedResponse registerUserAccount(@Valid RegisterUserRequest requestBody) {
+  public AuthenticatedResponse registerCustomerAccount(@Valid RegisterUserRequest requestBody) {
     if (userExists(requestBody.email())) {
       throw new DuplicateEmailException(
           String.format(
@@ -121,8 +121,9 @@ public class AuthenticationService implements UserDetailsManager {
                             requestBody.email())));
 
     if (passwordEncoder.matches(requestBody.password(), user.getPassword())) {
-      return
-              new AuthenticatedResponse(jwtService.generateTokenForUser(user),new BasicUserResponse(user.getId(), user.getEmail()));
+      return new AuthenticatedResponse(
+          jwtService.generateTokenForUser(user),
+          new BasicUserResponse(user.getId(), user.getEmail()));
     } else {
       throw new FailedLoginException(
           String.format(

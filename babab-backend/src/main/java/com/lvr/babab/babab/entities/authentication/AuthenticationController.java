@@ -16,10 +16,10 @@ public class AuthenticationController {
   private final AuthenticationService authenticationService;
 
   @PostMapping("/register")
-  public ResponseEntity<AuthenticatedResponse> register(
+  public ResponseEntity<AuthenticatedResponse> registerCustomer(
       @RequestBody @Valid RegisterUserRequest registerUserRequest) {
     AuthenticatedResponse authenticatedResponse =
-        authenticationService.registerUserAccount(registerUserRequest);
+        authenticationService.registerCustomerAccount(registerUserRequest);
     URI location =
         ServletUriComponentsBuilder.fromCurrentContextPath()
             .path("{user/id}")

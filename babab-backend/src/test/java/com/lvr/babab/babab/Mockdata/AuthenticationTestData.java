@@ -1,11 +1,12 @@
-package com.lvr.babab.babab.entities.authentication;
+package com.lvr.babab.babab.Mockdata;
 
+import com.lvr.babab.babab.entities.authentication.InvalidSelectionException;
 import com.lvr.babab.babab.entities.authentication.dto.AuthenticatedResponse;
 import com.lvr.babab.babab.entities.authentication.dto.BasicUserResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class MockDataAuthentication {
+public class AuthenticationTestData {
   public static String getUserPayloadValid() {
     return """
       {
