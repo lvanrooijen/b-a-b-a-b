@@ -159,6 +159,12 @@ public class AuthenticationService implements UserDetailsManager {
     userRepository.delete(user);
   }
 
+  /**
+   * Method to change a users password, not suitable for forgotten password scenario's
+   *
+   * @param oldPassword
+   * @param newPassword
+   */
   @Override
   public void changePassword(String oldPassword, String newPassword) {
     Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -168,7 +174,7 @@ public class AuthenticationService implements UserDetailsManager {
               .findByEmailIgnoreCase(authentication.getName())
               .orElseThrow(
                   () ->
-                      new UsernameNotFoundException(
+                      new UserNotFoundException(
                           String.format(
                               "[failed to change password] reason=user not found email=%s",
                               authentication.getName())));

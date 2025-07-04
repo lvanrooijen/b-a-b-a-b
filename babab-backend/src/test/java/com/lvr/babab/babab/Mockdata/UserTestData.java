@@ -1,6 +1,7 @@
 package com.lvr.babab.babab.Mockdata;
 
 import com.lvr.babab.babab.entities.address.Address;
+import com.lvr.babab.babab.entities.authentication.dto.LoginRequest;
 import com.lvr.babab.babab.entities.authentication.dto.RegisterBusinessAccountRequest;
 import com.lvr.babab.babab.entities.authentication.dto.RegisterUserRequest;
 import com.lvr.babab.babab.entities.users.BusinessUser;
@@ -36,5 +37,9 @@ public class UserTestData {
 
   public static RegisterBusinessAccountRequest getRegisterBusinessAccountRequest() {
     return new RegisterBusinessAccountRequest(COMPANY_NAME, KVK_NUMBER, EMAIL, PASSWORD);
+  }
+
+  public static LoginRequest getLoginRequest() {
+    return new LoginRequest(EMAIL, PASSWORD);
   }
 }
